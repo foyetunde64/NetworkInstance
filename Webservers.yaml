@@ -1,0 +1,49 @@
+Parameters: 
+  InstanceType:
+    Description: WebServerEC2 instance Type
+    Type: AWS::SSM::Parameter::Value<String>
+
+  MyVPC:
+    Description: VPC to operate 
+    Type: AWS::EC2::VPC::Id
+
+  ImageId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::ImageId::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId:
+         Ref: MyVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 24.126.15.115/32
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref ImageId
+
+Outputs:
+  InstanceSecurityGroup:
+    Description: The SSH Security Group for our Company
+    Value: !Ref InstanceSecurityGroup # SG name
+    Export: # Make the output available to re-use
+      Name: InstanceSecurityGroup # variable need to be GLOBY UNIQUE
+ 
+  MyEC2Instance:
+    Description: EC2 for the instance
+    Value: !Ref MyEC2Instance
+    Export:
+      Name: MyEC2Instance
